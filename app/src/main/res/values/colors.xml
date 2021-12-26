@@ -11,6 +11,16 @@
     <color name="light_blue_500">#03a9f4</color>
     <color name="light_blue_700">#0288d1</color>
 
+    <color name="color_error">#bf1e19</color>
+    <color name="color_text_main">#66000014</color>
+    <color name="color_delete_text_icon">#66000014</color>
+    <color name="color_text_header">#313131</color>
+    <color name="color_black">#313131</color>
+    <color name="color_white">#FFFFFF</color>
+    <color name="color_gray">#66000000</color>
 
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
 
 </resources>
