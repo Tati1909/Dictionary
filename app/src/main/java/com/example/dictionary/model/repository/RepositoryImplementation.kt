@@ -12,13 +12,13 @@ class RepositoryImplementation(
 
     /**
      * Репозиторий возвращает данные, используя dataSource (локальный или внешний)
+     * Если это слово есть в кэше, то верни нам его значения из кэша,
+     * если его нет в кэше, то верни нам его значения из сети и добавь в кэш.
      */
     override fun getData(word: String): Observable<List<DataModel>> {
-        /**
-         * если это слово есть в кэше, то верни нам его значения из кэша
-         * если его нет в кэше, то верни нам его значения из сети и добавь в кэш
-         */
-        if (cache.containsKey(word)) return Observable.just(cache[word])
+
+        if (cache.containsKey(word))
+            return Observable.just(cache[word])
 
         return dataSource.getData(word)
             .doOnNext { cache[word] = it }

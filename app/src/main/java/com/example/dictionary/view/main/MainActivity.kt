@@ -23,7 +23,7 @@ import com.example.dictionary.view.base.View
 4. Репозиторий (Repository), с помощью которого мы будем получать данные из сети или БД
 5. Источник данных для репозитория (DataSource) — конкретные имплементации Retrofit или БД
  */
-class MainActivity : BaseActivity<AppState>() {
+class MainActivity : BaseActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -40,7 +40,7 @@ class MainActivity : BaseActivity<AppState>() {
             }
         }
 
-    override fun createPresenter(): Presenter<AppState, View> {
+    override fun createPresenter(): Presenter<View> {
         return MainPresenterImpl()
     }
 
@@ -52,7 +52,6 @@ class MainActivity : BaseActivity<AppState>() {
 
         binding.searchFab.setOnClickListener {
             val searchDialogFragment = SearchDialogFragment.newInstance()
-
             searchDialogFragment.setOnSearchClickListener(object :
                 SearchDialogFragment.OnSearchClickListener {
                 override fun onClick(searchWord: String) {
