@@ -9,12 +9,12 @@ import com.example.dictionary.presenter.Presenter
  * Базовая View. Часть функционала каждого экрана будет общей (например, создание презентера),
 поэтому имеет смысл вывести его в родительский класс:
  */
-abstract class BaseActivity<T : AppState> : AppCompatActivity(), View {
+abstract class BaseActivity : AppCompatActivity(), View {
 
     // Храним ссылку на презентер
-    protected lateinit var presenter: Presenter<T, View>
+    protected lateinit var presenter: Presenter<View>
 
-    protected abstract fun createPresenter(): Presenter<T, View>
+    protected abstract fun createPresenter(): Presenter<View>
 
     abstract override fun renderData(appState: AppState)
 
