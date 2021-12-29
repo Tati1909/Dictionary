@@ -8,5 +8,9 @@
     <string name="search_hint">New word</string>
     <string name="delete_description">X</string>
     <string name="description">Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</string>
+    <string name="dialog_tittle_sorry">Sorry</string>
+    <string name="dialog_title_stub">Undefined error</string>
+    <string name="dialog_button_cancel">Cancel</string>
+    <string name="error_stub">Error</string>
 
 </resources>

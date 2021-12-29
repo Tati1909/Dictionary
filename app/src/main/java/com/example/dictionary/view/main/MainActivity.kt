@@ -13,6 +13,8 @@ import com.example.dictionary.model.data.AppState
 import com.example.dictionary.model.data.DataModel
 import com.example.dictionary.view.base.BaseActivity
 import com.example.dictionary.viewmodel.MainViewModel
+import dagger.android.AndroidInjection
+import javax.inject.Inject
 
 /**
  * Архитектура нашего приложения будет строиться по MVVM:
@@ -21,54 +23,61 @@ import com.example.dictionary.viewmodel.MainViewModel
 3. Репозиторий (Repository), с помощью которого мы будем получать данные из сети или БД
 4. Источник данных для репозитория (DataSource) — конкретные имплементации Retrofit или БД
  */
-class MainActivity : BaseActivity<AppState>() {
+class MainActivity : BaseActivity<AppState, MainInteractor>() {
 
     private lateinit var binding: ActivityMainBinding
 
-    override val model: MainViewModel by lazy {
-        ViewModelProvider.NewInstanceFactory().create(MainViewModel::class.java)
-    }
-
     /**
-     * Паттерн Observer в действии. Именно с его помощью мы подписываемся на
-     * изменения в LiveData
+     *     Внедряем фабрику для создания ViewModel
      */
-    private val observer = Observer<AppState> { renderData(it) }
+    @Inject
+    internal lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    /**override val viewModel: MainViewModel by lazy {
+    ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
+    }*/
+    override lateinit var viewModel: MainViewModel
 
     private var adapter: MainAdapter? = null
 
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
             override fun onItemClick(data: DataModel) {
-                Toast.makeText(
-                    this@MainActivity,
-                    data.text,
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this@MainActivity, data.text, Toast.LENGTH_SHORT).show()
             }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        /**
+         * Сообщаем Dagger’у, что тут понадобятся зависимости
+         */
+        AndroidInjection.inject(this)
 
+        super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        /**
+         * Фабрика уже готова, можно создавать ViewModel
+         */
+        viewModel = viewModelFactory.create(MainViewModel::class.java)
+        viewModel.subscribe().observe(this@MainActivity, Observer<AppState> {
+            renderData(it)
+        })
+
         binding.searchFab.setOnClickListener {
             val searchDialogFragment = SearchDialogFragment.newInstance()
-            searchDialogFragment.setOnSearchClickListener(object :
-                SearchDialogFragment.OnSearchClickListener {
-                override fun onClick(searchWord: String) {
-                    /**
-                     *  У ViewModel мы получаем LiveData через метод getData и
-                     *  подписываемся на изменения, передавая туда observer
-                     */
-                    model.getData(searchWord, true).observe(
-                        this@MainActivity,
-                        observer
-                    )
-                }
-            })
+
+            searchDialogFragment.setOnSearchClickListener(
+                object : SearchDialogFragment.OnSearchClickListener {
+                    override fun onClick(searchWord: String) {
+                        /**
+                         *  У ViewModel мы получаем LiveData через метод loadData и
+                         *  подписываемся на изменения, передавая туда observer
+                         */
+                        viewModel.loadData(searchWord, true)
+                    }
+                })
 
             searchDialogFragment.show(
                 supportFragmentManager,
@@ -119,7 +128,7 @@ class MainActivity : BaseActivity<AppState>() {
             /**
              * В случае ошибки мы повторно запрашиваем данные и подписываемся на изменения
              */
-            model.getData("hi", true).observe(this, observer)
+            viewModel.loadData("hi", true)
         }
     }
 
