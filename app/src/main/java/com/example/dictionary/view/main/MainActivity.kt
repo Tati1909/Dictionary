@@ -4,28 +4,36 @@ import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dictionary.*
 import com.example.dictionary.databinding.ActivityMainBinding
 import com.example.dictionary.model.data.AppState
 import com.example.dictionary.model.data.DataModel
-import com.example.dictionary.presenter.Presenter
 import com.example.dictionary.view.base.BaseActivity
-import com.example.dictionary.view.base.View
+import com.example.dictionary.viewmodel.MainViewModel
 
 /**
- * Архитектура нашего приложения будет строиться по MVP+MVI с учетом принципов Clean Architecture
-У нас будут такие классы:
+ * Архитектура нашего приложения будет строиться по MVVM:
 1. View
-2. Презентер
-3. Интерактор (Use Case, Interactor), который будет отвечать на сценарии использования
-приложения
-4. Репозиторий (Repository), с помощью которого мы будем получать данные из сети или БД
-5. Источник данных для репозитория (DataSource) — конкретные имплементации Retrofit или БД
+2. ViewModel
+3. Репозиторий (Repository), с помощью которого мы будем получать данные из сети или БД
+4. Источник данных для репозитория (DataSource) — конкретные имплементации Retrofit или БД
  */
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity<AppState>() {
 
     private lateinit var binding: ActivityMainBinding
+
+    override val model: MainViewModel by lazy {
+        ViewModelProvider.NewInstanceFactory().create(MainViewModel::class.java)
+    }
+
+    /**
+     * Паттерн Observer в действии. Именно с его помощью мы подписываемся на
+     * изменения в LiveData
+     */
+    private val observer = Observer<AppState> { renderData(it) }
 
     private var adapter: MainAdapter? = null
 
@@ -40,10 +48,6 @@ class MainActivity : BaseActivity() {
             }
         }
 
-    override fun createPresenter(): Presenter<View> {
-        return MainPresenterImpl()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,7 +59,14 @@ class MainActivity : BaseActivity() {
             searchDialogFragment.setOnSearchClickListener(object :
                 SearchDialogFragment.OnSearchClickListener {
                 override fun onClick(searchWord: String) {
-                    presenter.getData(searchWord, true)
+                    /**
+                     *  У ViewModel мы получаем LiveData через метод getData и
+                     *  подписываемся на изменения, передавая туда observer
+                     */
+                    model.getData(searchWord, true).observe(
+                        this@MainActivity,
+                        observer
+                    )
                 }
             })
 
@@ -105,7 +116,10 @@ class MainActivity : BaseActivity() {
         showViewError()
         binding.errorTextview.text = error ?: getString(R.string.undefined_error)
         binding.reloadButton.setOnClickListener {
-            presenter.getData("hi", true)
+            /**
+             * В случае ошибки мы повторно запрашиваем данные и подписываемся на изменения
+             */
+            model.getData("hi", true).observe(this, observer)
         }
     }
 

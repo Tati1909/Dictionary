@@ -1,38 +1,18 @@
 package com.example.dictionary.view.base
 
-import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.dictionary.model.data.AppState
-import com.example.dictionary.presenter.Presenter
+import com.example.dictionary.viewmodel.BaseViewModel
 
-/**
- * Базовая View. Часть функционала каждого экрана будет общей (например, создание презентера),
-поэтому имеет смысл вывести его в родительский класс:
- */
-abstract class BaseActivity : AppCompatActivity(), View {
+abstract class BaseActivity<T : AppState> : AppCompatActivity() {
 
-    // Храним ссылку на презентер
-    protected lateinit var presenter: Presenter<View>
+    /**
+     * В каждой Активити будет своя ViewModel, которая наследуется от BaseViewModel
+     */
+    abstract val model: BaseViewModel<T>
 
-    protected abstract fun createPresenter(): Presenter<View>
-
-    abstract override fun renderData(appState: AppState)
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        presenter = createPresenter()
-    }
-
-    // Когда View готова отображать данные, передаём ссылку на View в презентер
-    override fun onStart() {
-        super.onStart()
-        presenter.attachView(this)
-    }
-
-    // При пересоздании или уничтожении View удаляем ссылку, иначе в презентере
-// будет ссылка на несуществующую View
-    override fun onStop() {
-        super.onStop()
-        presenter.detachView(this)
-    }
+    /**
+     * Каждая Активити будет отображать какие-то данные в соответствующем состоянии
+     */
+    protected abstract fun renderData(appState: T)
 }
