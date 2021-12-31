@@ -21,13 +21,12 @@ class MainViewModel @Inject constructor(
             interactor.getData(word, isOnline)
                 .subscribeOn(schedulerProvider.io())
                 .observeOn(schedulerProvider.ui())
-                .subscribe({ state ->
+                .subscribe(
                     /**Данные успешно загружены;
                      * сохраняем их и передаем во View (через LiveData).*/
-                    liveDataForViewToObserve.value = state
-                }, { throwable ->
-                    liveDataForViewToObserve.value = AppState.Error(throwable)
-                })
+                    { state -> liveDataForViewToObserve.value = state },
+                    { throwable -> liveDataForViewToObserve.value = AppState.Error(throwable) }
+                )
         )
     }
 }

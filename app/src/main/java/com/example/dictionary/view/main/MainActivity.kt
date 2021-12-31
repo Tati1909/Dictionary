@@ -1,6 +1,7 @@
 package com.example.dictionary.view.main
 
 import android.os.Bundle
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
@@ -11,6 +12,7 @@ import com.example.dictionary.*
 import com.example.dictionary.databinding.ActivityMainBinding
 import com.example.dictionary.model.data.AppState
 import com.example.dictionary.model.data.DataModel
+import com.example.dictionary.utils.network.isOnline
 import com.example.dictionary.view.base.BaseActivity
 import com.example.dictionary.viewmodel.MainViewModel
 import dagger.android.AndroidInjection
@@ -40,10 +42,34 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
 
     private var adapter: MainAdapter? = null
 
+    private val fabClickListener: View.OnClickListener =
+        View.OnClickListener {
+            val searchDialogFragment = SearchDialogFragment.newInstance()
+            searchDialogFragment.setOnSearchClickListener(onSearchClickListener)
+            searchDialogFragment.show(supportFragmentManager, BOTTOM_SHEET_FRAGMENT_DIALOG_TAG)
+        }
+
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
             override fun onItemClick(data: DataModel) {
                 Toast.makeText(this@MainActivity, data.text, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private val onSearchClickListener: SearchDialogFragment.OnSearchClickListener =
+
+        object : SearchDialogFragment.OnSearchClickListener {
+            override fun onClick(searchWord: String) {
+                isNetworkAvailable = isOnline(applicationContext)
+                if (isNetworkAvailable) {
+                    /**
+                     *  У ViewModel мы получаем LiveData через метод loadData и
+                     *  подписываемся на изменения, передавая туда observer
+                     */
+                    viewModel.loadData(searchWord, isNetworkAvailable)
+                } else {
+                    showNoInternetConnectionDialog()
+                }
             }
         }
 
@@ -65,35 +91,22 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
             renderData(it)
         })
 
-        binding.searchFab.setOnClickListener {
-            val searchDialogFragment = SearchDialogFragment.newInstance()
+        binding.searchFab.setOnClickListener(fabClickListener)
 
-            searchDialogFragment.setOnSearchClickListener(
-                object : SearchDialogFragment.OnSearchClickListener {
-                    override fun onClick(searchWord: String) {
-                        /**
-                         *  У ViewModel мы получаем LiveData через метод loadData и
-                         *  подписываемся на изменения, передавая туда observer
-                         */
-                        viewModel.loadData(searchWord, true)
-                    }
-                })
-
-            searchDialogFragment.show(
-                supportFragmentManager,
-                BOTTOM_SHEET_FRAGMENT_DIALOG_TAG
-            )
-        }
     }
 
     override fun renderData(appState: AppState) {
         when (appState) {
             is AppState.Success -> {
+                showViewWorking()
                 val dataModel = appState.data
                 if (dataModel == null || dataModel.isEmpty()) {
-                    showErrorScreen(getString(R.string.empty_server_response_on_success))
+                    showAlertDialog(
+                        getString(R.string.dialog_tittle_sorry),
+                        getString(R.string.empty_server_response_on_success)
+                    )
                 } else {
-                    showViewSuccess()
+                    showViewWorking()
                     if (adapter == null) {
                         binding.mainActivityRecyclerview.layoutManager =
                             LinearLayoutManager(applicationContext)
@@ -116,38 +129,18 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
                 }
             }
             is AppState.Error -> {
-                showErrorScreen(appState.error.message)
+                showViewWorking()
+                showAlertDialog(getString(R.string.error_stub), appState.error.message)
             }
         }
     }
 
-    private fun showErrorScreen(error: String?) {
-        showViewError()
-        binding.errorTextview.text = error ?: getString(R.string.undefined_error)
-        binding.reloadButton.setOnClickListener {
-            /**
-             * В случае ошибки мы повторно запрашиваем данные и подписываемся на изменения
-             */
-            viewModel.loadData("hi", true)
-        }
-    }
-
-    private fun showViewSuccess() {
-        binding.successLinearLayout.visibility = VISIBLE
+    private fun showViewWorking() {
         binding.loadingFrameLayout.visibility = GONE
-        binding.errorLinearLayout.visibility = GONE
     }
 
     private fun showViewLoading() {
-        binding.successLinearLayout.visibility = GONE
         binding.loadingFrameLayout.visibility = VISIBLE
-        binding.errorLinearLayout.visibility = GONE
-    }
-
-    private fun showViewError() {
-        binding.successLinearLayout.visibility = GONE
-        binding.loadingFrameLayout.visibility = GONE
-        binding.errorLinearLayout.visibility = VISIBLE
     }
 
     companion object {
