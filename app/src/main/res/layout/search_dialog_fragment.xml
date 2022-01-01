@@ -9,20 +9,20 @@
 
     <TextView
         android:id="@+id/search_button_textview"
+        style="@style/TextViewButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/TextViewButtonStyle"
+        android:layout_gravity="end"
         android:layout_marginTop="@dimen/margin_medium"
         android:layout_marginEnd="@dimen/margin_medium"
-        android:layout_gravity="end"
         android:text="@string/button_search" />
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_marginTop="@dimen/margin_medium"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/margin_medium"
         android:layout_marginStart="@dimen/margin_medium"
+        android:layout_marginTop="@dimen/margin_medium"
+        android:layout_marginEnd="@dimen/margin_medium"
         android:layout_marginBottom="@dimen/margin_xxx_medium">
 
         <com.google.android.material.textfield.TextInputLayout
@@ -33,8 +33,8 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/search_edit_text"
-                android:layout_width="match_parent"
                 style="@style/BaseEditTextStyle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="@dimen/small_dimen" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -45,9 +45,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
             android:layout_marginTop="@dimen/margin_small"
+            android:contentDescription="@string/delete_description"
             android:src="@drawable/ic_delete_text"
             android:visibility="visible"
-            android:contentDescription="@string/delete_description"
             tools:visibility="visible" />
     </FrameLayout>
 </LinearLayout>
