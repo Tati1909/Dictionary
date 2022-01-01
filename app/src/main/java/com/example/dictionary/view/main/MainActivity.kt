@@ -35,9 +35,6 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
     @Inject
     internal lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    /**override val viewModel: MainViewModel by lazy {
-    ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-    }*/
     override lateinit var viewModel: MainViewModel
 
     private var adapter: MainAdapter? = null
@@ -63,8 +60,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
                 isNetworkAvailable = isOnline(applicationContext)
                 if (isNetworkAvailable) {
                     /**
-                     *  У ViewModel мы получаем LiveData через метод loadData и
-                     *  подписываемся на изменения, передавая туда observer
+                     *  У ViewModel мы получаем LiveData через метод loadData
                      */
                     viewModel.loadData(searchWord, isNetworkAvailable)
                 } else {
