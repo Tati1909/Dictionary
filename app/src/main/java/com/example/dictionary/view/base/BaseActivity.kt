@@ -5,17 +5,16 @@ import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.dictionary.R
 import com.example.dictionary.model.data.AppState
+import com.example.dictionary.model.repository.Interactor
 import com.example.dictionary.utils.network.isOnline
 import com.example.dictionary.utils.ui.AlertDialogFragment
-import com.example.dictionary.viewmodel.BaseViewModel
-import com.example.dictionary.viewmodel.Interactor
 
 abstract class BaseActivity<T : AppState, I : Interactor<T>> : AppCompatActivity() {
 
     /**
      * В каждой Активити будет своя ViewModel, которая наследуется от BaseViewModel
      */
-    abstract val viewModel: BaseViewModel<T>
+    abstract val model: BaseViewModel<T>
 
     protected var isNetworkAvailable: Boolean = false
 
