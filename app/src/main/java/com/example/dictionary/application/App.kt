@@ -1,32 +1,19 @@
 package com.example.dictionary.application
 
-import com.example.dictionary.di.AppComponent
-import com.example.dictionary.di.DaggerAppComponent
-import dagger.android.AndroidInjector
-import dagger.android.DaggerApplication
+import android.app.Application
+import com.example.dictionary.di.application
+import com.example.dictionary.di.mainScreen
+import org.koin.core.context.startKoin
 
-/**
- * Мы переопределяем метод androidInjector для внедрения зависимостей в Activity.
- * По своей сути — это вспомогательный метод для разработчиков для эффективного внедрения
- * компонентов платформы, таких как Активити, Сервис и т. п.
- */
-class App : DaggerApplication() {
+class App : Application() {
 
-    companion object {
-        lateinit var instance: App
-    }
-
+    /**
+     * Инициализируем Koin в приложении и прописываем все модули
+     */
     override fun onCreate() {
         super.onCreate()
-        instance = this@App
-    }
-
-    override fun applicationInjector(): AndroidInjector<App> =
-        applicationComponent
-
-    val applicationComponent: AppComponent by lazy {
-        DaggerAppComponent.builder()
-            .withApplication(this)
-            .build()
+        startKoin {
+            modules(listOf(application, mainScreen))
+        }
     }
 }

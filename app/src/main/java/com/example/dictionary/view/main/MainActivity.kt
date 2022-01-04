@@ -5,8 +5,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dictionary.*
 import com.example.dictionary.databinding.ActivityMainBinding
@@ -14,9 +12,7 @@ import com.example.dictionary.model.data.AppState
 import com.example.dictionary.model.data.DataModel
 import com.example.dictionary.utils.network.isOnline
 import com.example.dictionary.view.base.BaseActivity
-import com.example.dictionary.viewmodel.MainViewModel
-import dagger.android.AndroidInjection
-import javax.inject.Inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
  * Архитектура нашего приложения будет строиться по MVVM:
@@ -29,16 +25,17 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
 
     private lateinit var binding: ActivityMainBinding
 
-    /**
-     *     Внедряем фабрику для создания ViewModel
+    /** Теперь ViewModel инициализируется через функцию by viewModel()
+     *  Это функция, предоставляемая Koin из коробки через зависимость
+     *  import org.koin.androidx.viewmodel.ext.android.viewModel
      */
-    @Inject
-    internal lateinit var viewModelFactory: ViewModelProvider.Factory
+    override val model: MainViewModel by viewModel()
 
-    override lateinit var viewModel: MainViewModel
+    private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
 
-    private var adapter: MainAdapter? = null
-
+    /**
+     * При клике на кнопку поска
+     */
     private val fabClickListener: View.OnClickListener =
         View.OnClickListener {
             val searchDialogFragment = SearchDialogFragment.newInstance()
@@ -46,6 +43,9 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
             searchDialogFragment.show(supportFragmentManager, BOTTOM_SHEET_FRAGMENT_DIALOG_TAG)
         }
 
+    /**
+     * При клике на элемент списка
+     */
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
             override fun onItemClick(data: DataModel) {
@@ -54,7 +54,6 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         }
 
     private val onSearchClickListener: SearchDialogFragment.OnSearchClickListener =
-
         object : SearchDialogFragment.OnSearchClickListener {
             override fun onClick(searchWord: String) {
                 isNetworkAvailable = isOnline(applicationContext)
@@ -62,7 +61,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
                     /**
                      *  У ViewModel мы получаем LiveData через метод loadData
                      */
-                    viewModel.loadData(searchWord, isNetworkAvailable)
+                    model.loadData(searchWord, isNetworkAvailable)
                 } else {
                     showNoInternetConnectionDialog()
                 }
@@ -70,25 +69,13 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        /**
-         * Сообщаем Dagger’у, что тут понадобятся зависимости
-         */
-        AndroidInjection.inject(this)
 
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        /**
-         * Фабрика уже готова, можно создавать ViewModel
-         */
-        viewModel = viewModelFactory.create(MainViewModel::class.java)
-        viewModel.subscribe().observe(this@MainActivity, Observer<AppState> {
-            renderData(it)
-        })
-
-        binding.searchFab.setOnClickListener(fabClickListener)
-
+        iniViewModel()
+        initViews()
     }
 
     override fun renderData(appState: AppState) {
@@ -96,21 +83,13 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
             is AppState.Success -> {
                 showViewWorking()
                 val dataModel = appState.data
-                if (dataModel == null || dataModel.isEmpty()) {
+                if (dataModel.isNullOrEmpty()) {
                     showAlertDialog(
                         getString(R.string.dialog_tittle_sorry),
                         getString(R.string.empty_server_response_on_success)
                     )
                 } else {
-                    showViewWorking()
-                    if (adapter == null) {
-                        binding.mainActivityRecyclerview.layoutManager =
-                            LinearLayoutManager(applicationContext)
-                        binding.mainActivityRecyclerview.adapter =
-                            MainAdapter(onListItemClickListener, dataModel)
-                    } else {
-                        adapter!!.setData(dataModel)
-                    }
+                    adapter.setData(dataModel)
                 }
             }
             is AppState.Loading -> {
@@ -129,6 +108,23 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
                 showAlertDialog(getString(R.string.error_stub), appState.error.message)
             }
         }
+    }
+
+    private fun iniViewModel() {
+        /**
+         * Убедимся, что модель инициализируется раньше View
+         */
+        if (binding.mainActivityRecyclerview.adapter != null) {
+            throw IllegalStateException("The ViewModel should be initialised first")
+        }
+
+        model.subscribe().observe(this@MainActivity, { renderData(it) })
+    }
+
+    private fun initViews() {
+        binding.searchFab.setOnClickListener(fabClickListener)
+        binding.mainActivityRecyclerview.layoutManager = LinearLayoutManager(applicationContext)
+        binding.mainActivityRecyclerview.adapter = adapter
     }
 
     private fun showViewWorking() {

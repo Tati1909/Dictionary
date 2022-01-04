@@ -1,8 +1,9 @@
 package com.example.dictionary.model.datasource
 
 import com.example.dictionary.model.data.DataModel
-import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import io.reactivex.Observable
+import com.example.dictionary.model.datasource.api.ApiService
+import com.example.dictionary.model.datasource.api.BaseInterceptor
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -17,19 +18,29 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 class RetrofitImplementation : DataSource<List<DataModel>> {
 
-    override fun getData(word: String): Observable<List<DataModel>> {
-        return getService(BaseInterceptor.interceptor).search(word)
+    /**
+     * Добавляем  await, т к searchAsync возвращает Deferred(Отложенное значение).
+     * Функция await говорит о том, что мы должны дождаться выполнения корутины, запущенной через async.
+     * Соответственно, функция, которая ждёт корутину, должна быть с ключевым словом suspend.*/
+    override suspend fun getData(word: String): List<DataModel> {
+        return getService(BaseInterceptor.interceptor).searchAsync(word).await()
     }
 
     private fun getService(interceptor: Interceptor): ApiService {
         return createRetrofit(interceptor).create(ApiService::class.java)
     }
 
+    /**
+     * В addCallAdapterFactory теперь передаётся CoroutineCallAdapterFactory(),
+     * которая позволяет Retrofit работать с корутинами. Для ее использования нужно прописать
+     * для Ретрофита зависимость вместо той, которая была для Rx:
+     * implementation 'com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2'
+     */
     private fun createRetrofit(interceptor: Interceptor): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BASE_URL_LOCATIONS)
             .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .client(createOkHttpClient(interceptor))
             .build()
     }
