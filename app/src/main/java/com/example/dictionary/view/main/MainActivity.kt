@@ -127,8 +127,15 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         binding.mainActivityRecyclerview.adapter = adapter
     }
 
+    private fun showViewGreeting() {
+
+        binding.loadingFrameLayout.visibility = GONE
+    }
+
     private fun showViewWorking() {
         binding.loadingFrameLayout.visibility = GONE
+        binding.greetingText.visibility = GONE
+        binding.imageDictionary.visibility = GONE
     }
 
     private fun showViewLoading() {
