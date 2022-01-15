@@ -30,7 +30,11 @@ class MainViewModel(
         /**
          * Запускаем корутину для асинхронного доступа к серверу с помощью launch.
          * Можно запустить сопрограмму, используя viewModelScope.launch(более новый вариант),
-         * только в нем нет CoroutineExceptionHandler.
+         * только в нем нет CoroutineExceptionHandler. Для этого нужна библиотека -
+         * implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:x.x.x"
+         * Библиотека добавляет viewModelScope как функцию расширения ViewModel класса.
+         * Эта область связана с Dispatchers.Main и будет автоматически отменена,
+         * когда ViewModel будет очищена.
          */
         viewModelCoroutineScope.launch { startInteractor(word, isOnline) }
     }

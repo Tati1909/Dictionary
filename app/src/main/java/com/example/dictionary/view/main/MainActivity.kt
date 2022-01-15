@@ -4,22 +4,19 @@ import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dictionary.*
 import com.example.dictionary.databinding.ActivityMainBinding
 import com.example.dictionary.model.data.AppState
 import com.example.dictionary.model.data.DataModel
+import com.example.dictionary.utils.convertMeaningsToString
 import com.example.dictionary.utils.network.isOnline
 import com.example.dictionary.view.base.BaseActivity
+import com.example.dictionary.view.description.DescriptionActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
- * Архитектура нашего приложения будет строиться по MVVM:
-1. View
-2. ViewModel
-3. Репозиторий (Repository), с помощью которого мы будем получать данные из сети или БД
-4. Источник данных для репозитория (DataSource) — конкретные имплементации Retrofit или БД
+ * Экран со списком слов.
  */
 class MainActivity : BaseActivity<AppState, MainInteractor>() {
 
@@ -45,11 +42,19 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
 
     /**
      * При клике на элемент списка
+     * Слушатель получает от адаптера необходимые данные и запускает новый экран DescriptionActivity
      */
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
             override fun onItemClick(data: DataModel) {
-                Toast.makeText(this@MainActivity, data.text, Toast.LENGTH_SHORT).show()
+                startActivity(
+                    DescriptionActivity.getIntent(
+                        context = this@MainActivity,
+                        word = data.text!!,
+                        description = convertMeaningsToString(data.meanings!!),
+                        url = data.meanings[0].imageUrl
+                    )
+                )
             }
         }
 
@@ -127,11 +132,6 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         binding.mainActivityRecyclerview.adapter = adapter
     }
 
-    private fun showViewGreeting() {
-
-        binding.loadingFrameLayout.visibility = GONE
-    }
-
     private fun showViewWorking() {
         binding.loadingFrameLayout.visibility = GONE
         binding.greetingText.visibility = GONE
@@ -143,6 +143,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
     }
 
     companion object {
+
         private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG =
             "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
     }
