@@ -11,29 +11,10 @@
         android:layout_height="match_parent"
         android:gravity="center">
 
-        <ImageView
-            android:id="@+id/image_dictionary"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="200dp"
-            android:src="@drawable/dictionary"
-            android:visibility="visible" />
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/main_activity_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-
-        <TextView
-            android:id="@+id/greeting_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="500dp"
-            android:gravity="center"
-            android:text="@string/greeting"
-            android:visibility="visible" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/search_fab"
@@ -46,24 +27,6 @@
             app:tint="@null" />
     </FrameLayout>
 
-    <FrameLayout
-        android:id="@+id/loading_frame_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
-
-        <ProgressBar
-            android:id="@+id/progress_bar_horizontal"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center" />
-
-        <ProgressBar
-            android:id="@+id/progress_bar_round"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center" />
-    </FrameLayout>
+    <include layout="@layout/loading_layout" />
 
 </FrameLayout>

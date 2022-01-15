@@ -1,9 +1,11 @@
 package com.example.dictionary.view.main
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dictionary.*
 import com.example.dictionary.databinding.ActivityMainBinding
@@ -13,6 +15,7 @@ import com.example.dictionary.utils.convertMeaningsToString
 import com.example.dictionary.utils.network.isOnline
 import com.example.dictionary.view.base.BaseActivity
 import com.example.dictionary.view.description.DescriptionActivity
+import com.example.dictionary.view.history.HistoryActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
@@ -26,7 +29,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
      *  Это функция, предоставляемая Koin из коробки через зависимость
      *  import org.koin.androidx.viewmodel.ext.android.viewModel
      */
-    override val model: MainViewModel by viewModel()
+    override lateinit var model: MainViewModel
 
     private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
 
@@ -41,8 +44,9 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         }
 
     /**
-     * При клике на элемент списка
-     * Слушатель получает от адаптера необходимые данные и запускает новый экран DescriptionActivity
+     * При клике на элемент списка слушатель получает от адаптера необходимые данные и
+     * запускает новый экран DescriptionActivity.
+     * OnListItemClickListener - наш интерфейс в алаптере.
      */
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
@@ -83,35 +87,23 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         initViews()
     }
 
-    override fun renderData(appState: AppState) {
-        when (appState) {
-            is AppState.Success -> {
-                showViewWorking()
-                val dataModel = appState.data
-                if (dataModel.isNullOrEmpty()) {
-                    showAlertDialog(
-                        getString(R.string.dialog_tittle_sorry),
-                        getString(R.string.empty_server_response_on_success)
-                    )
-                } else {
-                    adapter.setData(dataModel)
-                }
+    override fun setDataToAdapter(data: List<DataModel>) {
+        adapter.setData(data)
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.history_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_history -> {
+                startActivity(Intent(this, HistoryActivity::class.java))
+                true
             }
-            is AppState.Loading -> {
-                showViewLoading()
-                if (appState.progress != null) {
-                    binding.progressBarHorizontal.visibility = VISIBLE
-                    binding.progressBarRound.visibility = GONE
-                    binding.progressBarHorizontal.progress = appState.progress
-                } else {
-                    binding.progressBarHorizontal.visibility = GONE
-                    binding.progressBarRound.visibility = VISIBLE
-                }
-            }
-            is AppState.Error -> {
-                showViewWorking()
-                showAlertDialog(getString(R.string.error_stub), appState.error.message)
-            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -123,23 +115,16 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
             throw IllegalStateException("The ViewModel should be initialised first")
         }
 
-        model.subscribe().observe(this@MainActivity, { renderData(it) })
+        val viewModel: MainViewModel by viewModel()
+        model = viewModel
+
+        model.subscribe().observe(this@MainActivity, Observer<AppState> { renderData(it) })
     }
 
     private fun initViews() {
         binding.searchFab.setOnClickListener(fabClickListener)
         binding.mainActivityRecyclerview.layoutManager = LinearLayoutManager(applicationContext)
         binding.mainActivityRecyclerview.adapter = adapter
-    }
-
-    private fun showViewWorking() {
-        binding.loadingFrameLayout.visibility = GONE
-        binding.greetingText.visibility = GONE
-        binding.imageDictionary.visibility = GONE
-    }
-
-    private fun showViewLoading() {
-        binding.loadingFrameLayout.visibility = VISIBLE
     }
 
     companion object {

@@ -1,14 +1,11 @@
 package com.example.dictionary.view.main
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.dictionary.R
+import com.example.dictionary.databinding.MainRecyclerviewItemBinding
 import com.example.dictionary.model.data.DataModel
 import com.example.dictionary.utils.convertMeaningsToString
-import kotlinx.android.synthetic.main.activity_main_recyclerview_item.view.description_textview_recycler_item
-import kotlinx.android.synthetic.main.activity_main_recyclerview_item.view.header_textview_recycler_item
 
 class MainAdapter(
     private var onListItemClickListener: OnListItemClickListener
@@ -22,10 +19,11 @@ class MainAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
-            RecyclerItemViewHolder {
+        RecyclerItemViewHolder {
         return RecyclerItemViewHolder(
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.activity_main_recyclerview_item, parent, false) as View
+            MainRecyclerviewItemBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
         )
     }
 
@@ -37,13 +35,15 @@ class MainAdapter(
         return data.size
     }
 
-    inner class RecyclerItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class RecyclerItemViewHolder(
+        private val binding: MainRecyclerviewItemBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(data: DataModel) {
 
             if (layoutPosition != RecyclerView.NO_POSITION) {
-                itemView.header_textview_recycler_item.text = data.text
-                itemView.description_textview_recycler_item.text =
+                binding.headerTextviewRecyclerItem.text = data.text
+                binding.descriptionTextviewRecyclerItem.text =
                     convertMeaningsToString(data.meanings!!)
                 itemView.setOnClickListener { openInNewWindow(data) }
             }
@@ -58,7 +58,8 @@ class MainAdapter(
     }
 
     /**
-     * Определяем интерфейс обратного вызова
+     * Определяем интерфейс обратного вызова.
+     * Переопределяем onItemClick в MainActivity и переходим при клике на слово в списке -> на экран DescriptionActivity.
      */
     interface OnListItemClickListener {
 

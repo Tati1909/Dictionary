@@ -7,7 +7,7 @@ import android.view.MenuItem
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import coil.ImageLoader
-import coil.request.LoadRequest
+import coil.request.ImageRequest
 import com.example.dictionary.R
 import com.example.dictionary.databinding.ActivityDescriptionBinding
 import com.example.dictionary.utils.network.isOnline
@@ -81,7 +81,7 @@ class DescriptionActivity : AppCompatActivity() {
     }
 
     /**
-     * Для того, чтобы обрабатывать ошибки, нам нужно сформировать LoadRequest, который создается через Builder,
+     * Для того, чтобы обрабатывать ошибки, нам нужно сформировать ImageRequest, который создается через Builder,
      * где мы передаем ссылку на фото и листенер с тремя колбэками:
     1. В onStart мы можем сделать что-то непосредственно перед началом загрузки;
     2. В onSuccess мы получаем готовый drawable;
@@ -92,7 +92,7 @@ class DescriptionActivity : AppCompatActivity() {
 
     private fun useCoilToLoadPhoto(imageView: ImageView, imageLink: String) {
 
-        val request = LoadRequest.Builder(this)
+        val request = ImageRequest.Builder(this)
             .data("https:$imageLink")
             .target(
                 onStart = {},
@@ -104,12 +104,13 @@ class DescriptionActivity : AppCompatActivity() {
             //)
             .build()
 
-        ImageLoader(this).execute(request)
+        ImageLoader(this).enqueue(request)
     }
 
     companion object {
 
         private const val DIALOG_FRAGMENT_TAG = "8c7dff51-9769-4f6d-bbee-a3896085e76e"
+
         private const val WORD_EXTRA = "f76a288a-5dcc-43f1-ba89-7fe1d53f63b0"
         private const val DESCRIPTION_EXTRA = "0eeb92aa-520b-4fd1-bb4b-027fbf963d9a"
         private const val URL_EXTRA = "6e4b154d-e01f-4953-a404-639fb3bf7281"

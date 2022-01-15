@@ -2,7 +2,7 @@ package com.example.dictionary.view.main
 
 import androidx.lifecycle.LiveData
 import com.example.dictionary.model.data.AppState
-import com.example.dictionary.utils.parseSearchResults
+import com.example.dictionary.utils.parseOnlineSearchResults
 import com.example.dictionary.view.base.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,7 +48,7 @@ class MainViewModel(
     private suspend fun startInteractor(word: String, isOnline: Boolean) =
         withContext(Dispatchers.IO) {
             val result = interactor.getData(word, isOnline)
-            val mapped = parseSearchResults(result)
+            val mapped = parseOnlineSearchResults(result)
             /**
              * меняем поток на main, т к взаимодействуем с UI
              */
