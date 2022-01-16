@@ -1,12 +1,11 @@
 package com.example.dictionary.view.main
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.dictionary.R
+import com.example.dictionary.databinding.MainRecyclerviewItemBinding
 import com.example.dictionary.model.data.DataModel
+import com.example.dictionary.utils.convertMeaningsToString
 
 class MainAdapter(
     private var onListItemClickListener: OnListItemClickListener
@@ -20,10 +19,11 @@ class MainAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
-            RecyclerItemViewHolder {
+        RecyclerItemViewHolder {
         return RecyclerItemViewHolder(
-            LayoutInflater.from(parent.context)
-                .inflate(R.layout.activity_main_recyclerview_item, parent, false) as View
+            MainRecyclerviewItemBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
         )
     }
 
@@ -35,24 +35,34 @@ class MainAdapter(
         return data.size
     }
 
-    inner class RecyclerItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class RecyclerItemViewHolder(
+        private val binding: MainRecyclerviewItemBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(data: DataModel) {
 
             if (layoutPosition != RecyclerView.NO_POSITION) {
-                itemView.findViewById<TextView>(R.id.header_textview_recycler_item).text = data.text
-                itemView.findViewById<TextView>(R.id.description_textview_recycler_item).text =
-                    data.meanings?.get(0)?.translation?.translation
+                binding.headerTextviewRecyclerItem.text = data.text
+                binding.descriptionTextviewRecyclerItem.text =
+                    convertMeaningsToString(data.meanings!!)
                 itemView.setOnClickListener { openInNewWindow(data) }
             }
         }
     }
 
+    /**
+     * Передаем событие в MainActivity
+     */
     private fun openInNewWindow(listItemData: DataModel) {
         onListItemClickListener.onItemClick(listItemData)
     }
 
+    /**
+     * Определяем интерфейс обратного вызова.
+     * Переопределяем onItemClick в MainActivity и переходим при клике на слово в списке -> на экран DescriptionActivity.
+     */
     interface OnListItemClickListener {
+
         fun onItemClick(data: DataModel)
     }
 }
