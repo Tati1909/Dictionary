@@ -50,7 +50,7 @@ object Versions {
     const val koinViewModel = "2.1.6"
 
     //Coil
-    const val coil = "0.11.0"
+    const val coil = "1.2.1"
 
     //Room
     const val roomKtx = "2.3.0"
