@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".view.main.MainActivity"
+            android:name=".view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,8 +24,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.description.DescriptionActivity" />
-        <activity android:name=".view.history.HistoryActivity" />
+        <activity android:name="com.example.description.DescriptionActivity" />
+        <activity android:name="com.example.historyscreen.HistoryActivity" />
     </application>
 
 </manifest>

@@ -1,18 +1,18 @@
 package com.example.dictionary.di
 
 import androidx.room.Room
-import com.example.dictionary.model.data.DataModel
-import com.example.dictionary.model.datasource.RetrofitImplementation
-import com.example.dictionary.model.datasource.RoomImplementation
-import com.example.dictionary.model.repository.Repository
-import com.example.dictionary.model.repository.RepositoryImplementation
-import com.example.dictionary.model.repository.RepositoryImplementationLocal
-import com.example.dictionary.model.repository.RepositoryLocal
-import com.example.dictionary.room.HistoryDataBase
-import com.example.dictionary.view.history.HistoryInteractor
-import com.example.dictionary.view.history.HistoryViewModel
-import com.example.dictionary.view.main.MainInteractor
-import com.example.dictionary.view.main.MainViewModel
+import com.example.dictionary.view.MainInteractor
+import com.example.dictionary.view.MainViewModel
+import com.example.historyscreen.HistoryInteractor
+import com.example.historyscreen.HistoryViewModel
+import com.example.model.DataModel
+import com.example.repository.Repository
+import com.example.repository.RepositoryImplementation
+import com.example.repository.RepositoryImplementationLocal
+import com.example.repository.RepositoryLocal
+import com.example.repository.RetrofitImplementation
+import com.example.repository.RoomImplementation
+import com.example.repository.room.HistoryDataBase
 import org.koin.dsl.module
 
 /** Создали три модуля:
