@@ -6,12 +6,14 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.core.BaseActivity
 import com.example.dictionary.R
 import com.example.dictionary.convertMeaningsToString
 import com.example.dictionary.databinding.ActivityMainBinding
 import com.example.model.AppState
 import com.example.utils.network.isOnline
+import com.example.utils.viewById
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
@@ -33,6 +35,11 @@ class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeCompo
     override val scope: Scope by activityScope()
 
     private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
+
+    /**
+     * Применяем наш собственный делегат
+     */
+    private val mainActivityRecyclerview by viewById<RecyclerView>(R.id.main_activity_recyclerview)
 
     /**
      * При клике на кнопку поска
@@ -110,9 +117,10 @@ class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeCompo
 
     private fun iniViewModel() {
         /**
-         * Убедимся, что модель инициализируется раньше View
+         * Убедимся, что модель инициализируется раньше View.
+         * Recyclerview без binding, т к написали свой делегат.
          */
-        if (binding.mainActivityRecyclerview.adapter != null) {
+        if (mainActivityRecyclerview.adapter != null) {
             throw IllegalStateException("The ViewModel should be initialised first")
         }
 
@@ -125,7 +133,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeCompo
     private fun initViews() {
         binding.searchFab.setOnClickListener(fabClickListener)
         binding.mainActivityRecyclerview.layoutManager = LinearLayoutManager(applicationContext)
-        binding.mainActivityRecyclerview.adapter = adapter
+        mainActivityRecyclerview.adapter = adapter
     }
 
     companion object {
