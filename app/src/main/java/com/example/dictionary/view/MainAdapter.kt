@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.dictionary.convertMeaningsToString
 import com.example.dictionary.databinding.MainRecyclerviewItemBinding
+import com.example.model.DataModel
 
 class MainAdapter(
     private var onListItemClickListener: OnListItemClickListener
@@ -38,7 +39,7 @@ class MainAdapter(
         private val binding: MainRecyclerviewItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(data: com.example.model.DataModel) {
+        fun bind(data: DataModel) {
 
             if (layoutPosition != RecyclerView.NO_POSITION) {
                 binding.headerTextviewRecyclerItem.text = data.text

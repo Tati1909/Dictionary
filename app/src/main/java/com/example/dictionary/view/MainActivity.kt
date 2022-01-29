@@ -7,16 +7,20 @@ import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.core.BaseActivity
-import com.example.dictionary.*
+import com.example.dictionary.R
+import com.example.dictionary.convertMeaningsToString
 import com.example.dictionary.databinding.ActivityMainBinding
 import com.example.model.AppState
 import com.example.utils.network.isOnline
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.android.ext.android.inject
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.activityScope
+import org.koin.core.scope.Scope
 
 /**
  * Экран со списком слов.
  */
-class MainActivity : BaseActivity<AppState, MainInteractor>() {
+class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeComponent {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -25,6 +29,8 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
      *  import org.koin.androidx.viewmodel.ext.android.viewModel
      */
     override lateinit var model: MainViewModel
+
+    override val scope: Scope by activityScope()
 
     private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
 
@@ -110,7 +116,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
             throw IllegalStateException("The ViewModel should be initialised first")
         }
 
-        val viewModel: MainViewModel by viewModel()
+        val viewModel: MainViewModel by inject()
         model = viewModel
 
         model.subscribe().observe(this@MainActivity, { renderData(it) })

@@ -4,13 +4,19 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import com.example.core.BaseActivity
 import com.example.historyscreen.databinding.ActivityHistoryBinding
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import com.example.model.AppState
+import org.koin.android.ext.android.inject
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.activityScope
+import org.koin.core.scope.Scope
 
-class HistoryActivity : BaseActivity<com.example.model.AppState, HistoryInteractor>() {
+class HistoryActivity : BaseActivity<AppState, HistoryInteractor>(), AndroidScopeComponent {
 
     private lateinit var binding: ActivityHistoryBinding
 
     override lateinit var model: HistoryViewModel
+
+    override val scope: Scope by activityScope()
 
     private val adapter: HistoryAdapter by lazy { HistoryAdapter() }
 
@@ -37,8 +43,7 @@ class HistoryActivity : BaseActivity<com.example.model.AppState, HistoryInteract
         if (binding.historyActivityRecyclerview.adapter != null) {
             throw IllegalStateException("The ViewModel should be initialised first")
         }
-        //import org.koin.android.viewmodel.ext.android.viewModel
-        val viewModel: HistoryViewModel by viewModel()
+        val viewModel: HistoryViewModel by inject()
         model = viewModel
         model.subscribe().observe(this@HistoryActivity, Observer<com.example.model.AppState> {
             renderData(it)
