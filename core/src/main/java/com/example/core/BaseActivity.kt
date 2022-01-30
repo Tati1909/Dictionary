@@ -1,14 +1,15 @@
 package com.example.core
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.core.databinding.LoadingLayoutBinding
 import com.example.core.viewmodel.BaseViewModel
 import com.example.core.viewmodel.Interactor
-import com.example.model.AppState
-import com.example.utils.network.isOnline
+import com.example.model.data.AppState
+import com.example.model.data.userdata.DataModel
+import com.example.utils.network.OnlineLiveData
 import com.example.utils.ui.AlertDialogFragment
 
 abstract class BaseActivity<T : AppState, I : Interactor<T>> :
@@ -21,18 +22,17 @@ abstract class BaseActivity<T : AppState, I : Interactor<T>> :
      */
     abstract val model: BaseViewModel<T>
 
-    protected var isNetworkAvailable: Boolean = false
+    protected var isNetworkAvailable: Boolean = true
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-        isNetworkAvailable = isOnline(applicationContext)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        subscribeToNetworkChange()
     }
 
     override fun onResume() {
         super.onResume()
         binding = LoadingLayoutBinding.inflate(layoutInflater)
 
-        isNetworkAvailable = isOnline(applicationContext)
         if (!isNetworkAvailable && isDialogNull()) {
             showNoInternetConnectionDialog()
         }
@@ -46,13 +46,15 @@ abstract class BaseActivity<T : AppState, I : Interactor<T>> :
             is AppState.Success -> {
                 showViewWorking()
                 val dataModel = appState.data
-                if (dataModel.isNullOrEmpty()) {
-                    showAlertDialog(
-                        getString(R.string.dialog_tittle_sorry),
-                        getString(R.string.empty_server_response_on_success)
-                    )
-                } else {
-                    setDataToAdapter(dataModel)
+                dataModel?.let {
+                    if (it.isEmpty()) {
+                        showAlertDialog(
+                            getString(R.string.dialog_tittle_sorry),
+                            getString(R.string.empty_server_response_on_success)
+                        )
+                    } else {
+                        setDataToAdapter(it)
+                    }
                 }
             }
             is AppState.Loading -> {
@@ -97,12 +99,30 @@ abstract class BaseActivity<T : AppState, I : Interactor<T>> :
         return supportFragmentManager.findFragmentByTag(DIALOG_FRAGMENT_TAG) == null
     }
 
+    /**
+     * Подписываемся на состояние сети
+     */
+    private fun subscribeToNetworkChange() {
+        OnlineLiveData(this).observe(
+            this@BaseActivity
+        ) {
+            isNetworkAvailable = it
+            if (!isNetworkAvailable) {
+                Toast.makeText(
+                    this@BaseActivity,
+                    R.string.dialog_message_device_is_offline,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
     companion object {
 
         private const val DIALOG_FRAGMENT_TAG = "74a54328-5d62-46bf-ab6b-cbf5d8c79522"
     }
 
-    abstract fun setDataToAdapter(data: List<com.example.model.DataModel>)
+    abstract fun setDataToAdapter(data: List<DataModel>)
 
 
 }

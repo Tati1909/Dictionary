@@ -8,11 +8,13 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.core.BaseActivity
+import com.example.description.DescriptionActivity
 import com.example.dictionary.R
 import com.example.dictionary.convertMeaningsToString
 import com.example.dictionary.databinding.ActivityMainBinding
-import com.example.model.AppState
-import com.example.utils.network.isOnline
+import com.example.historyscreen.HistoryActivity
+import com.example.model.data.AppState
+import com.example.model.data.userdata.DataModel
 import com.example.utils.viewById
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
@@ -58,13 +60,13 @@ class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeCompo
      */
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
-            override fun onItemClick(data: com.example.model.DataModel) {
+            override fun onItemClick(data: DataModel) {
                 startActivity(
-                    com.example.description.DescriptionActivity.getIntent(
+                    DescriptionActivity.getIntent(
                         context = this@MainActivity,
-                        word = data.text!!,
-                        description = convertMeaningsToString(data.meanings!!),
-                        url = data.meanings!![0].imageUrl
+                        word = data.text,
+                        description = convertMeaningsToString(data.meanings),
+                        url = data.meanings[0].imageUrl
                     )
                 )
             }
@@ -73,7 +75,6 @@ class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeCompo
     private val onSearchClickListener: SearchDialogFragment.OnSearchClickListener =
         object : SearchDialogFragment.OnSearchClickListener {
             override fun onClick(searchWord: String) {
-                isNetworkAvailable = isOnline(applicationContext)
                 if (isNetworkAvailable) {
                     /**
                      *  У ViewModel мы получаем LiveData через метод loadData
@@ -95,7 +96,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeCompo
         initViews()
     }
 
-    override fun setDataToAdapter(data: List<com.example.model.DataModel>) {
+    override fun setDataToAdapter(data: List<DataModel>) {
         adapter.setData(data)
 
     }
@@ -108,7 +109,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeCompo
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_history -> {
-                startActivity(Intent(this, com.example.historyscreen.HistoryActivity::class.java))
+                startActivity(Intent(this, HistoryActivity::class.java))
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -127,7 +128,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeCompo
         val viewModel: MainViewModel by inject()
         model = viewModel
 
-        model.subscribe().observe(this@MainActivity, { renderData(it) })
+        model.subscribe().observe(this@MainActivity) { renderData(it) }
     }
 
     private fun initViews() {

@@ -7,7 +7,7 @@ import com.example.dictionary.view.MainViewModel
 import com.example.historyscreen.HistoryActivity
 import com.example.historyscreen.HistoryInteractor
 import com.example.historyscreen.HistoryViewModel
-import com.example.model.DataModel
+import com.example.model.data.dto.SearchResultDto
 import com.example.repository.Repository
 import com.example.repository.RepositoryImplementation
 import com.example.repository.RepositoryImplementationLocal
@@ -34,11 +34,11 @@ val application = module {
     //Получаем DAO
     single { get<HistoryDataBase>().historyDao() }
 
-    single<Repository<List<DataModel>>> {
+    single<Repository<List<SearchResultDto>>> {
         RepositoryImplementation(RetrofitImplementation())
     }
 
-    single<RepositoryLocal<List<DataModel>>> {
+    single<RepositoryLocal<List<SearchResultDto>>> {
         RepositoryImplementationLocal(RoomImplementation(get()))
     }
 }

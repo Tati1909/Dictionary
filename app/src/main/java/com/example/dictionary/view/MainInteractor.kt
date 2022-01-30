@@ -1,8 +1,11 @@
 package com.example.dictionary.view
 
 import com.example.core.viewmodel.Interactor
-import com.example.model.AppState
-import com.example.model.DataModel
+import com.example.dictionary.mapSearchResultToResult
+import com.example.model.data.AppState
+import com.example.model.data.dto.SearchResultDto
+import com.example.repository.Repository
+import com.example.repository.RepositoryLocal
 
 /**
  * Наш Interactor  c бизнес-правилами(которые пишет системный аналитик).
@@ -12,8 +15,8 @@ import com.example.model.DataModel
  * т к состояние приложения не зависит от фреймворков.
  */
 class MainInteractor(
-    private val remoteRepository: com.example.repository.Repository<List<DataModel>>,
-    private val localRepository: com.example.repository.RepositoryLocal<List<DataModel>>
+    private val remoteRepository: Repository<List<SearchResultDto>>,
+    private val localRepository: RepositoryLocal<List<SearchResultDto>>
 ) : Interactor<AppState> {
 
     /** Интерактор лишь запрашивает у репозитория данные,
@@ -27,10 +30,10 @@ class MainInteractor(
          * в соответствии с принципами чистой архитектуры: интерактор обращается к репозиторию
          */
         if (fromRemoteSource) {
-            appState = AppState.Success(remoteRepository.getData(word))
+            appState = AppState.Success(mapSearchResultToResult(remoteRepository.getData(word)))
             localRepository.saveToDB(appState)
         } else {
-            appState = AppState.Success(localRepository.getData(word))
+            appState = AppState.Success(mapSearchResultToResult(localRepository.getData(word)))
         }
         return appState
     }

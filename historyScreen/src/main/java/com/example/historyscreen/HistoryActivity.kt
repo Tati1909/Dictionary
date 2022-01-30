@@ -1,10 +1,10 @@
 package com.example.historyscreen
 
 import android.os.Bundle
-import androidx.lifecycle.Observer
 import com.example.core.BaseActivity
 import com.example.historyscreen.databinding.ActivityHistoryBinding
-import com.example.model.AppState
+import com.example.model.data.AppState
+import com.example.model.data.userdata.DataModel
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
@@ -35,7 +35,7 @@ class HistoryActivity : BaseActivity<AppState, HistoryInteractor>(), AndroidScop
     }
 
     // Вызовется из базовой Activity, когда данные будут готовы
-    override fun setDataToAdapter(data: List<com.example.model.DataModel>) {
+    override fun setDataToAdapter(data: List<DataModel>) {
         adapter.setData(data)
     }
 
@@ -45,9 +45,7 @@ class HistoryActivity : BaseActivity<AppState, HistoryInteractor>(), AndroidScop
         }
         val viewModel: HistoryViewModel by inject()
         model = viewModel
-        model.subscribe().observe(this@HistoryActivity, Observer<com.example.model.AppState> {
-            renderData(it)
-        })
+        model.subscribe().observe(this@HistoryActivity) { renderData(it) }
     }
 
     private fun initViews() {

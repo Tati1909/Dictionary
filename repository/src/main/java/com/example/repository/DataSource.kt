@@ -1,5 +1,7 @@
 package com.example.repository
 
+import com.example.model.data.AppState
+
 /**
  * Источник данных для репозитория (Интернет, БД и т. п.)
  */
@@ -13,5 +15,5 @@ interface DataSource<T> {
  */
 interface DataSourceLocal<T> : DataSource<T> {
 
-    suspend fun saveToDB(appState: com.example.model.AppState)
+    suspend fun saveToDB(appState: AppState)
 }

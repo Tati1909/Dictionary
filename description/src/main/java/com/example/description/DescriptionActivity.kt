@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import coil.ImageLoader
 import coil.request.ImageRequest
 import com.example.description.databinding.ActivityDescriptionBinding
-import com.example.utils.network.isOnline
+import com.example.utils.network.OnlineLiveData
 import com.example.utils.ui.AlertDialogFragment
 
 /**
@@ -59,17 +59,21 @@ class DescriptionActivity : AppCompatActivity() {
     }
 
     private fun startLoadingOrShowError() {
-        if (isOnline(applicationContext)) {
-            setData()
-        } else {
-            AlertDialogFragment.newInstance(
-                getString(R.string.dialog_title_device_is_offline),
-                getString(R.string.dialog_message_device_is_offline)
-            ).show(
-                supportFragmentManager,
-                DIALOG_FRAGMENT_TAG
-            )
-            stopRefreshAnimationIfNeeded()
+        OnlineLiveData(this).observe(
+            this@DescriptionActivity
+        ) {
+            if (it) {
+                setData()
+            } else {
+                AlertDialogFragment.newInstance(
+                    getString(R.string.dialog_title_device_is_offline),
+                    getString(R.string.dialog_message_device_is_offline)
+                ).show(
+                    supportFragmentManager,
+                    DIALOG_FRAGMENT_TAG
+                )
+                stopRefreshAnimationIfNeeded()
+            }
         }
     }
 

@@ -1,7 +1,7 @@
-package com.example.model
+package com.example.model.data.dto
 
 import com.google.gson.annotations.SerializedName
 
-class Translation(
+class TranslationDto(
     @field:SerializedName("text") val translation: String?
 )

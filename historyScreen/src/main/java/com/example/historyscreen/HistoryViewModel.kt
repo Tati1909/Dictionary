@@ -2,7 +2,7 @@ package com.example.historyscreen
 
 import androidx.lifecycle.LiveData
 import com.example.core.viewmodel.BaseViewModel
-import com.example.model.AppState
+import com.example.model.data.AppState
 import kotlinx.coroutines.launch
 
 class HistoryViewModel(private val interactor: HistoryInteractor) :

@@ -2,17 +2,18 @@ package com.example.dictionary.view
 
 import androidx.lifecycle.LiveData
 import com.example.dictionary.parseOnlineSearchResults
+import com.example.model.data.AppState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainViewModel(
     private val interactor: MainInteractor,
-) : com.example.core.viewmodel.BaseViewModel<com.example.model.AppState>() {
+) : com.example.core.viewmodel.BaseViewModel<AppState>() {
 
-    private val liveDataForViewToObserve: LiveData<com.example.model.AppState> = _mutableLiveData
+    private val liveDataForViewToObserve: LiveData<AppState> = _mutableLiveData
 
-    fun subscribe(): LiveData<com.example.model.AppState> {
+    fun subscribe(): LiveData<AppState> {
         return liveDataForViewToObserve
     }
 
@@ -23,7 +24,7 @@ class MainViewModel(
      */
     override fun loadData(word: String, isOnline: Boolean) {
 
-        _mutableLiveData.value = com.example.model.AppState.Loading(null)
+        _mutableLiveData.value = AppState.Loading(null)
         cancelJob()
         /**
          * Запускаем корутину для асинхронного доступа к серверу с помощью launch.
@@ -57,11 +58,11 @@ class MainViewModel(
      * Обрабатываем ошибки
      */
     override fun handleError(error: Throwable) {
-        _mutableLiveData.postValue(com.example.model.AppState.Error(error))
+        _mutableLiveData.postValue(AppState.Error(error))
     }
 
     override fun onCleared() {
-        _mutableLiveData.value = com.example.model.AppState.Success(null)
+        _mutableLiveData.value = AppState.Success(null)
         super.onCleared()
     }
 }
