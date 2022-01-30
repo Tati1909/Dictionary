@@ -1,4 +1,6 @@
-package com.example.model
+package com.example.model.data
+
+import com.example.model.data.userdata.DataModel
 
 /**
  * Добавление модификатора sealed к суперклассу ограничивает возможность создания подклассов.

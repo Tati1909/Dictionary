@@ -6,17 +6,25 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.core.BaseActivity
-import com.example.dictionary.*
+import com.example.description.DescriptionActivity
+import com.example.dictionary.R
+import com.example.dictionary.convertMeaningsToString
 import com.example.dictionary.databinding.ActivityMainBinding
-import com.example.model.AppState
-import com.example.utils.network.isOnline
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import com.example.historyscreen.HistoryActivity
+import com.example.model.data.AppState
+import com.example.model.data.userdata.DataModel
+import com.example.utils.viewById
+import org.koin.android.ext.android.inject
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.activityScope
+import org.koin.core.scope.Scope
 
 /**
  * Экран со списком слов.
  */
-class MainActivity : BaseActivity<AppState, MainInteractor>() {
+class MainActivity : BaseActivity<AppState, MainInteractor>(), AndroidScopeComponent {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -26,7 +34,14 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
      */
     override lateinit var model: MainViewModel
 
+    override val scope: Scope by activityScope()
+
     private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
+
+    /**
+     * Применяем наш собственный делегат
+     */
+    private val mainActivityRecyclerview by viewById<RecyclerView>(R.id.main_activity_recyclerview)
 
     /**
      * При клике на кнопку поска
@@ -45,13 +60,13 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
      */
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
-            override fun onItemClick(data: com.example.model.DataModel) {
+            override fun onItemClick(data: DataModel) {
                 startActivity(
-                    com.example.description.DescriptionActivity.getIntent(
+                    DescriptionActivity.getIntent(
                         context = this@MainActivity,
-                        word = data.text!!,
-                        description = convertMeaningsToString(data.meanings!!),
-                        url = data.meanings!![0].imageUrl
+                        word = data.text,
+                        description = convertMeaningsToString(data.meanings),
+                        url = data.meanings[0].imageUrl
                     )
                 )
             }
@@ -60,7 +75,6 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
     private val onSearchClickListener: SearchDialogFragment.OnSearchClickListener =
         object : SearchDialogFragment.OnSearchClickListener {
             override fun onClick(searchWord: String) {
-                isNetworkAvailable = isOnline(applicationContext)
                 if (isNetworkAvailable) {
                     /**
                      *  У ViewModel мы получаем LiveData через метод loadData
@@ -82,7 +96,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         initViews()
     }
 
-    override fun setDataToAdapter(data: List<com.example.model.DataModel>) {
+    override fun setDataToAdapter(data: List<DataModel>) {
         adapter.setData(data)
 
     }
@@ -95,7 +109,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_history -> {
-                startActivity(Intent(this, com.example.historyscreen.HistoryActivity::class.java))
+                startActivity(Intent(this, HistoryActivity::class.java))
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -104,22 +118,23 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
 
     private fun iniViewModel() {
         /**
-         * Убедимся, что модель инициализируется раньше View
+         * Убедимся, что модель инициализируется раньше View.
+         * Recyclerview без binding, т к написали свой делегат.
          */
-        if (binding.mainActivityRecyclerview.adapter != null) {
+        if (mainActivityRecyclerview.adapter != null) {
             throw IllegalStateException("The ViewModel should be initialised first")
         }
 
-        val viewModel: MainViewModel by viewModel()
+        val viewModel: MainViewModel by inject()
         model = viewModel
 
-        model.subscribe().observe(this@MainActivity, { renderData(it) })
+        model.subscribe().observe(this@MainActivity) { renderData(it) }
     }
 
     private fun initViews() {
         binding.searchFab.setOnClickListener(fabClickListener)
         binding.mainActivityRecyclerview.layoutManager = LinearLayoutManager(applicationContext)
-        binding.mainActivityRecyclerview.adapter = adapter
+        mainActivityRecyclerview.adapter = adapter
     }
 
     companion object {

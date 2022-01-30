@@ -1,11 +1,11 @@
-package com.example.model
+package com.example.model.data.dto
 
 import com.google.gson.annotations.SerializedName
 
 /**
  * Значение слова
  */
-class Meanings(
-    @field:SerializedName("translation") val translation: Translation?,
+class MeaningsDto(
+    @field:SerializedName("translation") val translationDto: TranslationDto?,
     @field:SerializedName("imageUrl") val imageUrl: String?
 )

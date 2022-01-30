@@ -5,14 +5,15 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.dictionary.convertMeaningsToString
 import com.example.dictionary.databinding.MainRecyclerviewItemBinding
+import com.example.model.data.userdata.DataModel
 
 class MainAdapter(
     private var onListItemClickListener: OnListItemClickListener
 ) : RecyclerView.Adapter<MainAdapter.RecyclerItemViewHolder>() {
 
-    private var data: List<com.example.model.DataModel> = arrayListOf()
+    private var data: List<DataModel> = arrayListOf()
 
-    fun setData(data: List<com.example.model.DataModel>) {
+    fun setData(data: List<DataModel>) {
         this.data = data
         notifyDataSetChanged()
     }
@@ -38,7 +39,7 @@ class MainAdapter(
         private val binding: MainRecyclerviewItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(data: com.example.model.DataModel) {
+        fun bind(data: DataModel) {
 
             if (layoutPosition != RecyclerView.NO_POSITION) {
                 binding.headerTextviewRecyclerItem.text = data.text
@@ -52,7 +53,7 @@ class MainAdapter(
     /**
      * Передаем событие в MainActivity
      */
-    private fun openInNewWindow(listItemData: com.example.model.DataModel) {
+    private fun openInNewWindow(listItemData: DataModel) {
         onListItemClickListener.onItemClick(listItemData)
     }
 
@@ -62,6 +63,6 @@ class MainAdapter(
      */
     interface OnListItemClickListener {
 
-        fun onItemClick(data: com.example.model.DataModel)
+        fun onItemClick(data: DataModel)
     }
 }

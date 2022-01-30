@@ -1,33 +1,35 @@
 package com.example.repository
 
-import com.example.model.AppState
+import com.example.model.data.AppState
+import com.example.model.data.dto.SearchResultDto
+import com.example.repository.room.HistoryEntity
 
 /**
  * Принимаем на вход список слов в виде таблицы из БД и переводим его в List<DataModel>
  */
-fun mapHistoryEntityToSearchResult(list: List<com.example.repository.room.HistoryEntity>): List<com.example.model.DataModel> {
-    val dataModel = ArrayList<com.example.model.DataModel>()
+fun mapHistoryEntityToSearchResult(list: List<HistoryEntity>): List<SearchResultDto> {
+    val searchResult = ArrayList<SearchResultDto>()
 
     if (!list.isNullOrEmpty()) {
         for (entity in list) {
-            dataModel.add(com.example.model.DataModel(entity.word, null))
+            searchResult.add(SearchResultDto(entity.word, null))
         }
     }
-    return dataModel
+    return searchResult
 }
 
 /**
  * convertDataModelSuccessToEntity конвертирует полученный от сервера результат в
 данные, доступные для сохранения в БД
  */
-fun convertDataModelSuccessToEntity(appState: AppState): com.example.repository.room.HistoryEntity? {
+fun convertDataModelSuccessToEntity(appState: AppState): HistoryEntity? {
     return when (appState) {
         is AppState.Success -> {
             val searchResult = appState.data
-            if (searchResult.isNullOrEmpty() || searchResult[0].text.isNullOrEmpty()) {
+            if (searchResult.isNullOrEmpty() || searchResult[0].text.isEmpty()) {
                 null
             } else {
-                com.example.repository.room.HistoryEntity(searchResult[0].text!!, null)
+                HistoryEntity(searchResult[0].text, null)
             }
         }
         else -> null

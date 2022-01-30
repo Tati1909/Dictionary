@@ -1,5 +1,6 @@
 package com.example.repository
 
+import com.example.model.data.dto.SearchResultDto
 import com.example.repository.api.ApiService
 import com.example.repository.api.BaseInterceptor
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
@@ -15,13 +16,13 @@ import retrofit2.converter.gson.GsonConverterFactory
  * а также обрабатывать ошибки сервера.
  * ApiService — это имплементация запроса через Retrofit.
  */
-class RetrofitImplementation : DataSource<List<com.example.model.DataModel>> {
+class RetrofitImplementation : DataSource<List<SearchResultDto>> {
 
     /**
      * Добавляем  await, т к searchAsync возвращает Deferred(Отложенное значение).
      * Функция await говорит о том, что мы должны дождаться выполнения корутины, запущенной через async.
      * Соответственно, функция, которая ждёт корутину, должна быть с ключевым словом suspend.*/
-    override suspend fun getData(word: String): List<com.example.model.DataModel> {
+    override suspend fun getData(word: String): List<SearchResultDto> {
         return getService(BaseInterceptor.interceptor).searchAsync(word).await()
     }
 

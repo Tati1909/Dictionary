@@ -1,11 +1,13 @@
 package com.example.dictionary.di
 
 import androidx.room.Room
+import com.example.dictionary.view.MainActivity
 import com.example.dictionary.view.MainInteractor
 import com.example.dictionary.view.MainViewModel
+import com.example.historyscreen.HistoryActivity
 import com.example.historyscreen.HistoryInteractor
 import com.example.historyscreen.HistoryViewModel
-import com.example.model.DataModel
+import com.example.model.data.dto.SearchResultDto
 import com.example.repository.Repository
 import com.example.repository.RepositoryImplementation
 import com.example.repository.RepositoryImplementationLocal
@@ -13,6 +15,8 @@ import com.example.repository.RepositoryLocal
 import com.example.repository.RetrofitImplementation
 import com.example.repository.RoomImplementation
 import com.example.repository.room.HistoryDataBase
+import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /** Создали три модуля:
@@ -30,31 +34,32 @@ val application = module {
     //Получаем DAO
     single { get<HistoryDataBase>().historyDao() }
 
-    single<Repository<List<DataModel>>> {
+    single<Repository<List<SearchResultDto>>> {
         RepositoryImplementation(RetrofitImplementation())
     }
 
-    single<RepositoryLocal<List<DataModel>>> {
+    single<RepositoryLocal<List<SearchResultDto>>> {
         RepositoryImplementationLocal(RoomImplementation(get()))
     }
 }
 
 /**
  * Внедрение зависимостей экрана MainActitvity
- * Функция factory сообщает Koin, что эту зависимость нужно создавать каждый
- * раз заново, что как раз подходит для Activity и её компонентов.
  * get() — создание экземпляра класса.
  */
 val mainScreen = module {
-
-    factory { MainViewModel(interactor = get()) }
-    factory { MainInteractor(remoteRepository = get(), localRepository = get()) }
+    scope(named<MainActivity>()) {
+        viewModel { MainViewModel(interactor = get()) }
+        scoped { MainInteractor(remoteRepository = get(), localRepository = get()) }
+    }
 }
 
 /**
  * Внедрение зависимостей базы данных
  */
 val historyScreen = module {
-    factory { HistoryViewModel(interactor = get()) }
-    factory { HistoryInteractor(remoteRepository = get(), localRepository = get()) }
+    scope(named<HistoryActivity>()) {
+        viewModel { HistoryViewModel(interactor = get()) }
+        scoped { HistoryInteractor(remoteRepository = get(), localRepository = get()) }
+    }
 }

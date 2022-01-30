@@ -2,13 +2,14 @@ package com.example.core.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.model.data.AppState
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 
-abstract class BaseViewModel<T : com.example.model.AppState>(
+abstract class BaseViewModel<T : AppState>(
     protected val _mutableLiveData: MutableLiveData<T> = MutableLiveData()
 ) : ViewModel() {
 

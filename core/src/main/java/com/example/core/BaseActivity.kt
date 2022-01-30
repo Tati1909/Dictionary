@@ -1,34 +1,38 @@
 package com.example.core
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.utils.network.isOnline
+import com.example.core.databinding.LoadingLayoutBinding
+import com.example.core.viewmodel.BaseViewModel
+import com.example.core.viewmodel.Interactor
+import com.example.model.data.AppState
+import com.example.model.data.userdata.DataModel
+import com.example.utils.network.OnlineLiveData
 import com.example.utils.ui.AlertDialogFragment
 
-abstract class BaseActivity<T : com.example.model.AppState, I : com.example.core.viewmodel.Interactor<T>> :
+abstract class BaseActivity<T : AppState, I : Interactor<T>> :
     AppCompatActivity() {
 
-    private lateinit var binding: com.example.core.databinding.LoadingLayoutBinding
+    private lateinit var binding: LoadingLayoutBinding
 
     /**
      * В каждой Активити будет своя ViewModel, которая наследуется от BaseViewModel
      */
-    abstract val model: com.example.core.viewmodel.BaseViewModel<T>
+    abstract val model: BaseViewModel<T>
 
-    protected var isNetworkAvailable: Boolean = false
+    protected var isNetworkAvailable: Boolean = true
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-        isNetworkAvailable = isOnline(applicationContext)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        subscribeToNetworkChange()
     }
 
     override fun onResume() {
         super.onResume()
-        binding = com.example.core.databinding.LoadingLayoutBinding.inflate(layoutInflater)
+        binding = LoadingLayoutBinding.inflate(layoutInflater)
 
-        isNetworkAvailable = isOnline(applicationContext)
         if (!isNetworkAvailable && isDialogNull()) {
             showNoInternetConnectionDialog()
         }
@@ -37,21 +41,23 @@ abstract class BaseActivity<T : com.example.model.AppState, I : com.example.core
     /**
      * Активити будет отображать какие-то данные в соответствующем состоянии
      */
-    protected fun renderData(appState: com.example.model.AppState) {
+    protected fun renderData(appState: AppState) {
         when (appState) {
-            is com.example.model.AppState.Success -> {
+            is AppState.Success -> {
                 showViewWorking()
                 val dataModel = appState.data
-                if (dataModel.isNullOrEmpty()) {
-                    showAlertDialog(
-                        getString(R.string.dialog_tittle_sorry),
-                        getString(R.string.empty_server_response_on_success)
-                    )
-                } else {
-                    setDataToAdapter(dataModel)
+                dataModel?.let {
+                    if (it.isEmpty()) {
+                        showAlertDialog(
+                            getString(R.string.dialog_tittle_sorry),
+                            getString(R.string.empty_server_response_on_success)
+                        )
+                    } else {
+                        setDataToAdapter(it)
+                    }
                 }
             }
-            is com.example.model.AppState.Loading -> {
+            is AppState.Loading -> {
                 showViewLoading()
                 if (appState.progress != null) {
                     binding.progressBarHorizontal.visibility = View.VISIBLE
@@ -62,7 +68,7 @@ abstract class BaseActivity<T : com.example.model.AppState, I : com.example.core
                     binding.progressBarRound.visibility = View.VISIBLE
                 }
             }
-            is com.example.model.AppState.Error -> {
+            is AppState.Error -> {
                 showViewWorking()
                 showAlertDialog(getString(R.string.error_stub), appState.error.message)
             }
@@ -93,12 +99,30 @@ abstract class BaseActivity<T : com.example.model.AppState, I : com.example.core
         return supportFragmentManager.findFragmentByTag(DIALOG_FRAGMENT_TAG) == null
     }
 
+    /**
+     * Подписываемся на состояние сети
+     */
+    private fun subscribeToNetworkChange() {
+        OnlineLiveData(this).observe(
+            this@BaseActivity
+        ) {
+            isNetworkAvailable = it
+            if (!isNetworkAvailable) {
+                Toast.makeText(
+                    this@BaseActivity,
+                    R.string.dialog_message_device_is_offline,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
     companion object {
 
         private const val DIALOG_FRAGMENT_TAG = "74a54328-5d62-46bf-ab6b-cbf5d8c79522"
     }
 
-    abstract fun setDataToAdapter(data: List<com.example.model.DataModel>)
+    abstract fun setDataToAdapter(data: List<DataModel>)
 
 
 }
