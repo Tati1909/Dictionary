@@ -24,8 +24,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.example.description.DescriptionActivity" />
-        <activity android:name="com.example.historyscreen.HistoryActivity" />
     </application>
 
 </manifest>

@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.example.description">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.description">
+
+    <application>
+        <activity android:name="com.example.description.DescriptionActivity" />
+    </application>
 
 </manifest>
